@@ -604,6 +604,10 @@
       clearTimeout(state.nextTimer);
     }
 
+    function randomNextMoleDelay() {
+      return 1000 + Math.random() * 2000;
+    }
+
     function getMoleImage(hole) {
       return hole.querySelector(".mole-image");
     }
@@ -670,7 +674,7 @@
           setNormalMole(hole);
 
           if (state.running) {
-            scheduleNextPop(220 + Math.random() * 320);
+            scheduleNextPop(randomNextMoleDelay());
           }
         }, 200);
       }, 680 + Math.random() * 320);
@@ -787,7 +791,7 @@
         }
 
         if (state.running) {
-          scheduleNextPop(180 + Math.random() * 220);
+          scheduleNextPop(randomNextMoleDelay());
         }
       }, 420);
     }
