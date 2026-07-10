@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Custom Whack-a-Mole</title>
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&f[]=cabinet-grotesk@700,800&display=swap" rel="stylesheet" />
+  <style>
+    :root, [data-theme="light"] {
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem;
+      --color-bg: #f7f6f2;
+      --color-surface: #fbfbf9;
+      --color-surface-2: #f1eee8;
+      --color-border: #d9d2c7;
+      --color-text: #25211c;
+      --color-text-inverse: #f9f8f4;
+      --color-primary: #01696f;
+      --color-primary-hover: #0c4e54;
+      --shadow-sm: 0 1px 2px rgba(28, 24, 20, 0.08);
+      --shadow-md: 0 12px 26px rgba(28, 24, 20, 0.14);
+      --shadow-lg: 0 20px 50px rgba(28, 24, 20, 0.18);
+      --radius-xl: 1.5rem;
+      --radius-full: 9999px;
+      --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+      --font-body: 'Satoshi', 'Inter', sans-serif;
+      --font-display: 'Cabinet Grotesk', 'Inter', sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --color-bg: #171614;
+      --color-surface: #1d1b19;
+      --color-surface-2: #252320;
+      --color-border: #3a3631;
+      --color-text: #ece7df;
+      --color-text-inverse: #1a1816;
+      --color-primary: #54a5ab;
+      --color-primary-hover: #7bc4ca;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+      --shadow-md: 0 12px 26px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.36);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: var(--space-4);
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background:
+        radial-gradient(circle at top left, rgba(1, 105, 111, 0.12), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(156, 41, 81, 0.10), transparent 24%),
+        var(--color-bg);
+      overflow: hidden;
+      cursor: none;
+    }
+
+    img, svg { display: block; max-width: 100%; }
+    button { font: inherit; cursor: none; border: 0; }
+    :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; border-radius: 0.5rem; }
+
+    .game-shell {
+      width: min(100%, 920px);
+      display: grid;
+      gap: var(--space-4);
+      justify-items: center;
+      position: relative;
+    }
+
+    .top-controls {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-3);
+      pointer-events: none;
+    }
+
+    .start-btn,
+    .theme-toggle {
+      pointer-events: auto;
+      min-height: 46px;
+      border-radius: var(--radius-full);
+      padding: 0.85rem 1.15rem;
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--transition), background var(--transition);
+    }
+
+    .start-btn {
+      background: var(--color-primary);
+      color: var(--color-text-inverse);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .start-btn:hover,
+    .start-btn:focus-visible { background: var(--color-primary-hover); }
+
+    .theme-toggle {
+      width: 46px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      background: var(--color-surface);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+
+    .board-wrap {
+      width: 100%;
+      position: relative;
+      display: grid;
+      justify-items: center;
+    }
+
+    .board-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(130px, 180px));
+      gap: var(--space-4);
+      justify-content: center;
+    }
+
+    .hole {
+      position: relative;
+      aspect-ratio: 1 / 1.02;
+      border-radius: 1.6rem;
+      background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 8%, var(--color-surface-2)) 0%, color-mix(in srgb, #8d5a2b 22%, var(--color-surface-2)) 100%);
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--color-text) 10%, var(--color-border));
+      box-shadow: inset 0 -14px 18px rgba(0,0,0,0.12), var(--shadow-md);
+      min-height: 142px;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+
+    .hole:hover { transform: translateY(-2px); }
+    .hole:active { transform: translateY(1px) scale(0.99); }
+
+    .hole::after {
+      content: '';
+      position: absolute;
+      left: 12%;
+      right: 12%;
+      bottom: 14px;
+      height: 26%;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba(31, 22, 16, 0.95) 0%, rgba(50, 34, 24, 0.92) 58%, rgba(89, 63, 42, 0.88) 100%);
+      z-index: 2;
+    }
+
+    .mole-wrap {
+      position: absolute;
+      left: 50%;
+      bottom: 18px;
+      transform: translate(-50%, 68%);
+      width: 62%;
+      height: 68%;
+      z-index: 1;
+      transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    .hole.up .mole-wrap { transform: translate(-50%, 0%); }
+    .hole.hit .mole-wrap { transform: translate(-50%, 0%) scale(1.05); }
+
+    .mole-figure {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      border-radius: 1.25rem 1.25rem 0.95rem 0.95rem;
+      overflow: hidden;
+      background: linear-gradient(180deg, #d6b08a 0%, #8c6240 100%);
+      box-shadow: var(--shadow-sm);
+      border: 2px solid rgba(255,255,255,0.35);
+    }
+
+    .mole-figure img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .mole-fallback {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      color: #fffaf3;
+      font-weight: 800;
+      background: linear-gradient(180deg, #bb8253, #7e5336);
+    }
+
+    .mole-hit {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, rgba(156, 41, 81, 0.92), rgba(120, 17, 54, 0.95));
+      color: #fff;
+      font-size: var(--text-sm);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 120ms ease;
+    }
+
+    .hole.hit .mole-hit { opacity: 1; }
+
+    .hammer {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 96px;
+      height: 96px;
+      transform: translate3d(-120px, -120px, 0);
+      pointer-events: none;
+      z-index: 50;
+      transition: transform 45ms linear;
+      transform-origin: 68% 24%;
+      filter: drop-shadow(0 10px 16px rgba(0,0,0,0.24));
+    }
+
+    .hammer.swing {
+      transform: translate3d(var(--hx), var(--hy), 0) rotate(28deg) scale(0.98);
+    }
+
+    .hammer-body { width: 100%; height: 100%; }
+    .hammer-user {
+      width: 100%; height: 100%; border-radius: 1.2rem; overflow: hidden; border: 3px solid rgba(255,255,255,0.7); background: var(--color-surface);
+    }
+    .hammer-user img { width: 100%; height: 100%; object-fit: cover; }
+    .hammer-default { position: relative; width: 80px; height: 80px; }
+    .hammer-default::before, .hammer-default::after { content: ''; position: absolute; border-radius: 999px; }
+    .hammer-default::before { width: 24px; height: 68px; background: linear-gradient(180deg, #b3773c, #805029); left: 32px; top: 8px; transform: rotate(28deg); }
+    .hammer-default::after { width: 48px; height: 24px; background: linear-gradient(180deg, #c7d0d8, #7b8893); left: 14px; top: 4px; border-radius: 0.85rem; box-shadow: inset 0 -4px 5px rgba(0,0,0,0.18); }
+
+    .result-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(13, 11, 9, 0.6);
+      border-radius: var(--radius-xl);
+      display: grid;
+      place-items: center;
+      padding: var(--space-5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 220ms ease;
+      z-index: 20;
+    }
+
+    .result-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .result-card {
+      width: min(100%, 360px);
+      background: rgba(22, 18, 15, 0.88);
+      color: white;
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: var(--shadow-lg);
+      padding: var(--space-6);
+      display: grid;
+      gap: var(--space-4);
+      justify-items: center;
+      text-align: center;
+    }
+
+    .result-card h2 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+    }
+
+    .result-card p {
+      margin: 0;
+      font-size: var(--text-base);
+      color: rgba(255,255,255,0.86);
+    }
+
+    .mini-score {
+      position: absolute;
+      right: 0;
+      bottom: -3.5rem;
+      opacity: 0;
+      pointer-events: none;
+      font-size: var(--text-sm);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
+      padding: 0.55rem 0.9rem;
+      box-shadow: var(--shadow-sm);
+      transition: opacity var(--transition);
+    }
+
+    .game-shell.show-score .mini-score { opacity: 1; }
+
+    @media (max-width: 720px) {
+      body { overflow: auto; cursor: auto; }
+      button { cursor: pointer; }
+      .board-grid { grid-template-columns: repeat(3, minmax(88px, 1fr)); gap: var(--space-3); }
+      .hole { min-height: 108px; }
+      .hammer { display: none; }
+      .mini-score { position: static; opacity: 1; margin-top: var(--space-3); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="hammer" id="hammer" aria-hidden="true">
+    <div class="hammer-body" id="hammerBody"></div>
+  </div>
+
+  <main class="game-shell" id="gameShell">
+    <div class="top-controls">
+      <button class="start-btn" id="startBtn" type="button">Start</button>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+    </div>
+
+    <section class="board-wrap" aria-label="Whack a mole board">
+      <div class="board-grid" id="board"></div>
+
+      <div class="result-overlay show" id="resultOverlay" aria-live="polite">
+        <div class="result-card">
+          <h2 id="overlayTitle">Ready?</h2>
+          <p id="overlayText">Hit the mole at least 5 times in 10 tries.</p>
+          <button class="start-btn" id="overlayButton" type="button">Play</button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    const ASSETS = {
+      mole: './assets/mole.jpg',
+      hit: './assets/mole-hit.png',
+      hammer: './assets/hammer.png'
+    };
+
+    const board = document.getElementById('board');
+    const startBtn = document.getElementById('startBtn');
+    const overlayButton = document.getElementById('overlayButton');
+    const resultOverlay = document.getElementById('resultOverlay');
+    const overlayTitle = document.getElementById('overlayTitle');
+    const overlayText = document.getElementById('overlayText');
+    const hammer = document.getElementById('hammer');
+    const hammerBody = document.getElementById('hammerBody');
+    const themeToggle = document.querySelector('[data-theme-toggle]');
+    const gameShell = document.getElementById('gameShell');
+
+    const state = {
+      tries: 0,
+      hits: 0,
+      misses: 0,
+      maxTries: 10,
+      targetHits: 5,
+      running: false,
+      activeHole: null,
+      popTimer: null,
+      nextTimer: null,
+      theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    };
+
+    document.documentElement.setAttribute('data-theme', state.theme);
+    updateThemeIcon();
+
+    function createHole(index) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'hole';
+      button.setAttribute('aria-label', `Hole ${index + 1}`);
+      button.dataset.index = String(index);
+      button.innerHTML = `
+        <span class="mole-wrap" aria-hidden="true">
+          <span class="mole-figure">
+            <img src="${ASSETS.mole}" alt="Mole" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'mole-fallback',textContent:'MOLE'}))">
+            <span class="mole-hit"><img src="${ASSETS.hit}" alt="Hit mole" onerror="this.parentElement.textContent='POW!'" /></span>
+          </span>
+        </span>
+      `;
+      button.addEventListener('click', () => handleHoleClick(button));
+      return button;
+    }
+
+    const holes = Array.from({ length: 9 }, (_, index) => createHole(index));
+    holes.forEach(hole => board.appendChild(hole));
+
+    hammerBody.innerHTML = `<div class="hammer-user"><img src="${ASSETS.hammer}" alt="Hammer image" onerror="this.parentElement.replaceWith(Object.assign(document.createElement('div'),{className:'hammer-default'}))" /></div>`;
+
+    function clearTimers() {
+      clearTimeout(state.popTimer);
+      clearTimeout(state.nextTimer);
+    }
+
+    function hideAllMoles() {
+      holes.forEach((hole) => hole.classList.remove('up', 'hit'));
+      state.activeHole = null;
+    }
+
+    function randomHole() {
+      const available = holes.filter((hole) => hole !== state.activeHole);
+      return available[Math.floor(Math.random() * available.length)];
+    }
+
+    function scheduleNextPop(delay = 320) {
+      clearTimeout(state.nextTimer);
+      if (!state.running) return;
+      state.nextTimer = setTimeout(popMole, delay);
+    }
+
+    function popMole() {
+      hideAllMoles();
+      if (!state.running) return;
+      const hole = randomHole();
+      state.activeHole = hole;
+      hole.classList.add('up');
+      state.popTimer = setTimeout(() => {
+        if (state.activeHole === hole) {
+          hole.classList.remove('up', 'hit');
+          state.activeHole = null;
+          scheduleNextPop(220 + Math.random() * 320);
+        }
+      }, 680 + Math.random() * 320);
+    }
+
+    function beginRound() {
+      clearTimers();
+      hideAllMoles();
+      state.tries = 0;
+      state.hits = 0;
+      state.misses = 0;
+      state.running = true;
+      gameShell.classList.remove('show-score');
+      resultOverlay.classList.remove('show');
+      scheduleNextPop(350);
+    }
+
+    function finishRound() {
+      clearTimers();
+      hideAllMoles();
+      state.running = false;
+      const won = state.hits >= state.targetHits;
+      gameShell.classList.add('show-score');
+      overlayTitle.textContent = won ? 'sorry' : 'Try again';
+      overlayText.textContent = won
+        ? ''
+        : `You got ${state.hits} hits. You need 5 out of 10.`;
+      overlayButton.textContent = 'Play again';
+      resultOverlay.classList.add('show');
+    }
+
+    function registerTry(hitSuccessful) {
+      state.tries += 1;
+      if (hitSuccessful) state.hits += 1;
+      else state.misses += 1;
+      if (state.hits >= state.targetHits) {
+        finishRound();
+        return;
+      }
+      if (state.tries >= state.maxTries) finishRound();
+    }
+
+    function handleHoleClick(hole) {
+      if (!state.running) return;
+      const isActive = hole === state.activeHole && hole.classList.contains('up');
+      registerTry(isActive);
+      if (!isActive) return;
+      clearTimers();
+      state.activeHole = null;
+      hole.classList.add('hit');
+      setTimeout(() => {
+        hole.classList.remove('up', 'hit');
+        if (state.running && state.tries < state.maxTries) scheduleNextPop(180 + Math.random() * 220);
+      }, 380);
+    }
+
+    startBtn.addEventListener('click', beginRound);
+    overlayButton.addEventListener('click', beginRound);
+
+    document.addEventListener('pointermove', (event) => {
+      const x = event.clientX - 18;
+      const y = event.clientY - 18;
+      hammer.style.setProperty('--hx', `${x}px`);
+      hammer.style.setProperty('--hy', `${y}px`);
+      if (!hammer.classList.contains('swing')) {
+        hammer.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      }
+    });
+
+    document.addEventListener('pointerdown', () => {
+      hammer.classList.add('swing');
+      setTimeout(() => {
+        hammer.classList.remove('swing');
+      }, 110);
+    });
+
+    function updateThemeIcon() {
+      themeToggle.innerHTML = state.theme === 'dark'
+        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>'
+        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', state.theme);
+      updateThemeIcon();
+    });
+
+  </script>
+</body>
+</html>
