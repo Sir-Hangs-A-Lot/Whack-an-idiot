@@ -68,10 +68,8 @@
       padding: var(--space-4);
       overflow: hidden;
       cursor: none;
-
       font-family: var(--font-body);
       color: var(--color-text);
-
       background:
         radial-gradient(circle at top left, rgba(1, 105, 111, 0.12), transparent 28%),
         radial-gradient(circle at bottom right, rgba(156, 41, 81, 0.10), transparent 24%),
@@ -117,8 +115,8 @@
     .theme-toggle {
       pointer-events: auto;
       min-height: 46px;
-      border-radius: var(--radius-full);
       padding: 0.85rem 1.15rem;
+      border-radius: var(--radius-full);
       box-shadow: var(--shadow-sm);
       transition: transform var(--transition), background var(--transition);
     }
@@ -203,17 +201,13 @@
         );
     }
 
-    /*
-      Both mole images live inside this one wrapper.
-      So they rise and lower together.
-    */
     .mole-wrap {
       position: absolute;
       left: 50%;
       bottom: 18px;
       width: 62%;
       height: 68%;
-      z-index: 3;
+      z-index: 1;
       pointer-events: none;
       transform: translate(-50%, 68%);
       transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -238,54 +232,17 @@
       box-shadow: var(--shadow-sm);
     }
 
-    /*
-      Both images have identical dimensions and position.
-      They are displayed one above the other.
-    */
-    .mole-base,
-    .mole-hit-image {
-      position: absolute;
-      inset: 0;
+    .mole-image {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: opacity 120ms ease;
-    }
-
-    /*
-      Initial state:
-      normal mole = visible
-      hit mole = transparent
-    */
-    .mole-base {
-      z-index: 1;
-      opacity: 1;
-    }
-
-    .mole-hit-image {
-      z-index: 2;
-      opacity: 0;
-    }
-
-    /*
-      Successful click:
-      normal mole = transparent
-      hit mole = visible
-    */
-    .hole.hit .mole-base {
-      opacity: 0;
-    }
-
-    .hole.hit .mole-hit-image {
-      opacity: 1;
     }
 
     .mole-fallback {
-      position: absolute;
-      inset: 0;
+      width: 100%;
+      height: 100%;
       display: grid;
       place-items: center;
-      z-index: 3;
       color: #fffaf3;
       font-weight: 800;
       background: linear-gradient(180deg, #bb8253, #7e5336);
@@ -447,7 +404,7 @@
     <div class="hammer-body" id="hammerBody"></div>
   </div>
 
-  <main class="game-shell">
+  <main class="game-shell" id="gameShell">
     <div class="top-controls">
       <button class="start-btn" id="startBtn" type="button">Start</button>
       <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
@@ -482,6 +439,7 @@
     const hammer = document.getElementById("hammer");
     const hammerBody = document.getElementById("hammerBody");
     const themeToggle = document.querySelector("[data-theme-toggle]");
+    const gameShell = document.getElementById("gameShell");
 
     const state = {
       tries: 0,
@@ -513,16 +471,10 @@
         <span class="mole-wrap" aria-hidden="true">
           <span class="mole-figure">
             <img
-              class="mole-base"
+              class="mole-image"
               src="${ASSETS.mole}"
               alt="Mole"
               onerror="this.replaceWith(Object.assign(document.createElement('span'), { className: 'mole-fallback', textContent: 'MOLE' }))"
-            >
-            <img
-              class="mole-hit-image"
-              src="${ASSETS.hit}"
-              alt="Hit mole"
-              onerror="this.style.display='none'"
             >
           </span>
         </span>
@@ -551,24 +503,32 @@
       clearTimeout(state.nextTimer);
     }
 
-    /*
-      Return a hole to its initial visual state:
-      base mole visible, hit mole hidden.
-    */
-    function resetMoleImages(hole) {
-      hole.classList.remove("hit");
+    function getMoleImage(hole) {
+      return hole.querySelector(".mole-image");
+    }
 
-      const baseMole = hole.querySelector(".mole-base");
-      const hitMole = hole.querySelector(".mole-hit-image");
+    function setNormalMole(hole) {
+      const moleImage = getMoleImage(hole);
 
-      if (baseMole) baseMole.style.opacity = "1";
-      if (hitMole) hitMole.style.opacity = "0";
+      if (moleImage) {
+        moleImage.src = ASSETS.mole;
+        moleImage.alt = "Mole";
+      }
+    }
+
+    function setHitMole(hole) {
+      const moleImage = getMoleImage(hole);
+
+      if (moleImage) {
+        moleImage.src = ASSETS.hit;
+        moleImage.alt = "Hit mole";
+      }
     }
 
     function hideAllMoles() {
       holes.forEach((hole) => {
         hole.classList.remove("up", "hit");
-        resetMoleImages(hole);
+        setNormalMole(hole);
       });
 
       state.activeHole = null;
@@ -594,31 +554,26 @@
 
       const hole = randomHole();
 
-      /*
-        Before rising:
-        normal mole = opacity 1
-        hit mole = opacity 0
-      */
-      resetMoleImages(hole);
+      /* Ensure every new pop starts with normal mole.png. */
+      setNormalMole(hole);
 
       state.activeHole = hole;
       hole.classList.add("up");
 
       state.popTimer = setTimeout(() => {
-        if (state.activeHole === hole) {
-          /*
-            Mole was missed:
-            lower both image layers together.
-          */
-          hole.classList.remove("up");
+        if (state.activeHole !== hole) return;
 
-          setTimeout(() => {
-            resetMoleImages(hole);
-          }, 200);
+        /* Missed mole goes down using the regular mole image. */
+        hole.classList.remove("up");
+        state.activeHole = null;
 
-          state.activeHole = null;
-          scheduleNextPop(220 + Math.random() * 320);
-        }
+        setTimeout(() => {
+          setNormalMole(hole);
+
+          if (state.running) {
+            scheduleNextPop(220 + Math.random() * 320);
+          }
+        }, 200);
       }, 680 + Math.random() * 320);
     }
 
@@ -631,6 +586,7 @@
       state.misses = 0;
       state.running = true;
 
+      gameShell.classList.remove("show-score");
       resultOverlay.classList.remove("show");
 
       scheduleNextPop(350);
@@ -644,6 +600,7 @@
 
       const won = state.hits >= state.targetHits;
 
+      gameShell.classList.add("show-score");
       overlayTitle.textContent = won ? "Sorry" : "Try again";
       overlayText.textContent = won
         ? ""
@@ -653,19 +610,9 @@
       resultOverlay.classList.add("show");
     }
 
-    function registerTry(hitSuccessful) {
+    function registerMiss() {
       state.tries += 1;
-
-      if (hitSuccessful) {
-        state.hits += 1;
-      } else {
-        state.misses += 1;
-      }
-
-      if (state.hits >= state.targetHits) {
-        finishRound();
-        return;
-      }
+      state.misses += 1;
 
       if (state.tries >= state.maxTries) {
         finishRound();
@@ -679,36 +626,48 @@
         hole === state.activeHole &&
         hole.classList.contains("up");
 
-      registerTry(isActive);
-
-      if (!isActive) return;
+      if (!isActive) {
+        registerMiss();
+        return;
+      }
 
       clearTimers();
       state.activeHole = null;
 
       /*
-        Hit:
-        CSS changes normal mole to opacity 0,
-        hit mole to opacity 1.
+        Immediately replace normal mole image with mole-hit image.
+        This remains visible briefly above the hole.
       */
+      setHitMole(hole);
       hole.classList.add("hit");
 
+      state.tries += 1;
+      state.hits += 1;
+
       /*
-        Let the hit face be visible briefly,
-        then lower the parent wrapper containing both images.
+        After 180ms, remove "up".
+        The same hit-image then lowers with .mole-wrap.
       */
       setTimeout(() => {
-        hole.classList.remove("up");
+        hole.classList.remove("up", "hit");
       }, 180);
 
       /*
-        Once both images are down, reset:
-        normal mole opacity 1, hit mole opacity 0.
+        Once the 200ms lowering transition finishes:
+        restore normal mole.png, then continue or finish.
       */
       setTimeout(() => {
-        resetMoleImages(hole);
+        setNormalMole(hole);
 
-        if (state.running && state.tries < state.maxTries) {
+        const won = state.hits >= state.targetHits;
+        const outOfTries = state.tries >= state.maxTries;
+
+        if (won || outOfTries) {
+          finishRound();
+          return;
+        }
+
+        if (state.running) {
           scheduleNextPop(180 + Math.random() * 220);
         }
       }, 420);
