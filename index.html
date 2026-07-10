@@ -4,14 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Beat him up !!!</title>
+
   <link rel="preconnect" href="https://api.fontshare.com" />
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&f[]=cabinet-grotesk@700,800&display=swap" rel="stylesheet" />
+
   <style>
     :root, [data-theme="light"] {
       --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
       --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
       --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
-      --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem;
+
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+
       --color-bg: #f7f6f2;
       --color-surface: #fbfbf9;
       --color-surface-2: #f1eee8;
@@ -20,14 +28,17 @@
       --color-text-inverse: #f9f8f4;
       --color-primary: #01696f;
       --color-primary-hover: #0c4e54;
+
       --shadow-sm: 0 1px 2px rgba(28, 24, 20, 0.08);
       --shadow-md: 0 12px 26px rgba(28, 24, 20, 0.14);
       --shadow-lg: 0 20px 50px rgba(28, 24, 20, 0.18);
+
       --radius-xl: 1.5rem;
       --radius-full: 9999px;
       --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
-      --font-body: 'Satoshi', 'Inter', sans-serif;
-      --font-display: 'Cabinet Grotesk', 'Inter', sans-serif;
+
+      --font-body: "Satoshi", "Inter", sans-serif;
+      --font-display: "Cabinet Grotesk", "Inter", sans-serif;
     }
 
     [data-theme="dark"] {
@@ -39,12 +50,15 @@
       --color-text-inverse: #1a1816;
       --color-primary: #54a5ab;
       --color-primary-hover: #7bc4ca;
+
       --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
       --shadow-md: 0 12px 26px rgba(0, 0, 0, 0.3);
       --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.36);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -52,19 +66,35 @@
       display: grid;
       place-items: center;
       padding: var(--space-4);
+      overflow: hidden;
+      cursor: none;
+
       font-family: var(--font-body);
       color: var(--color-text);
+
       background:
         radial-gradient(circle at top left, rgba(1, 105, 111, 0.12), transparent 28%),
         radial-gradient(circle at bottom right, rgba(156, 41, 81, 0.10), transparent 24%),
         var(--color-bg);
-      overflow: hidden;
+    }
+
+    img,
+    svg {
+      display: block;
+      max-width: 100%;
+    }
+
+    button {
+      border: 0;
+      font: inherit;
       cursor: none;
     }
 
-    img, svg { display: block; max-width: 100%; }
-    button { font: inherit; cursor: none; border: 0; }
-    :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; border-radius: 0.5rem; }
+    :focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 3px;
+      border-radius: 0.5rem;
+    }
 
     .game-shell {
       width: min(100%, 920px);
@@ -101,7 +131,9 @@
     }
 
     .start-btn:hover,
-    .start-btn:focus-visible { background: var(--color-primary-hover); }
+    .start-btn:focus-visible {
+      background: var(--color-primary-hover);
+    }
 
     .theme-toggle {
       width: 46px;
@@ -129,58 +161,87 @@
 
     .hole {
       position: relative;
+      min-height: 142px;
       aspect-ratio: 1 / 1.02;
-      border-radius: 1.6rem;
-      background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 8%, var(--color-surface-2)) 0%, color-mix(in srgb, #8d5a2b 22%, var(--color-surface-2)) 100%);
       overflow: hidden;
       border: 1px solid color-mix(in srgb, var(--color-text) 10%, var(--color-border));
-      box-shadow: inset 0 -14px 18px rgba(0,0,0,0.12), var(--shadow-md);
-      min-height: 142px;
+      border-radius: 1.6rem;
+      background:
+        linear-gradient(
+          180deg,
+          color-mix(in srgb, var(--color-primary) 8%, var(--color-surface-2)) 0%,
+          color-mix(in srgb, #8d5a2b 22%, var(--color-surface-2)) 100%
+        );
+      box-shadow: inset 0 -14px 18px rgba(0, 0, 0, 0.12), var(--shadow-md);
       transition: transform var(--transition), box-shadow var(--transition);
     }
 
-    .hole:hover { transform: translateY(-2px); }
-    .hole:active { transform: translateY(1px) scale(0.99); }
+    .hole:hover {
+      transform: translateY(-2px);
+    }
+
+    .hole:active {
+      transform: translateY(1px) scale(0.99);
+    }
 
     .hole::after {
-      content: '';
+      content: "";
       position: absolute;
       left: 12%;
       right: 12%;
       bottom: 6px;
       height: 26%;
-      border-radius: 50%;
-      background: radial-gradient(circle at center, rgba(31, 22, 16, 0.95) 0%, rgba(50, 34, 24, 0.92) 58%, rgba(89, 63, 42, 0.88) 100%);
       z-index: 2;
       pointer-events: none;
+      border-radius: 50%;
+      background:
+        radial-gradient(
+          circle at center,
+          rgba(31, 22, 16, 0.95) 0%,
+          rgba(50, 34, 24, 0.92) 58%,
+          rgba(89, 63, 42, 0.88) 100%
+        );
     }
 
+    /*
+      Both mole images live inside this one wrapper.
+      So they rise and lower together.
+    */
     .mole-wrap {
       position: absolute;
       left: 50%;
       bottom: 18px;
-      transform: translate(-50%, 68%);
       width: 62%;
       height: 68%;
       z-index: 3;
-      transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
       pointer-events: none;
+      transform: translate(-50%, 68%);
+      transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .hole.up .mole-wrap { transform: translate(-50%, 0%); }
-    .hole.hit .mole-wrap { transform: translate(-50%, 0%) scale(1.05); }
+    .hole.up .mole-wrap {
+      transform: translate(-50%, 0%);
+    }
+
+    .hole.hit .mole-wrap {
+      transform: translate(-50%, 0%) scale(1.05);
+    }
 
     .mole-figure {
+      position: relative;
       width: 100%;
       height: 100%;
-      position: relative;
-      border-radius: 1.25rem 1.25rem 0.95rem 0.95rem;
       overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.35);
+      border-radius: 1.25rem 1.25rem 0.95rem 0.95rem;
       background: linear-gradient(180deg, #d6b08a 0%, #8c6240 100%);
       box-shadow: var(--shadow-sm);
-      border: 2px solid rgba(255,255,255,0.35);
     }
 
+    /*
+      Both images have identical dimensions and position.
+      They are displayed one above the other.
+    */
     .mole-base,
     .mole-hit-image {
       position: absolute;
@@ -191,16 +252,26 @@
       transition: opacity 120ms ease;
     }
 
+    /*
+      Initial state:
+      normal mole = visible
+      hit mole = transparent
+    */
     .mole-base {
-      opacity: 1;
       z-index: 1;
+      opacity: 1;
     }
 
     .mole-hit-image {
-      opacity: 0;
       z-index: 2;
+      opacity: 0;
     }
 
+    /*
+      Successful click:
+      normal mole = transparent
+      hit mole = visible
+    */
     .hole.hit .mole-base {
       opacity: 0;
     }
@@ -210,10 +281,11 @@
     }
 
     .mole-fallback {
-      width: 100%;
-      height: 100%;
+      position: absolute;
+      inset: 0;
       display: grid;
       place-items: center;
+      z-index: 3;
       color: #fffaf3;
       font-weight: 800;
       background: linear-gradient(180deg, #bb8253, #7e5336);
@@ -225,40 +297,82 @@
       top: 0;
       width: 96px;
       height: 96px;
-      transform: translate3d(-120px, -120px, 0);
-      pointer-events: none;
       z-index: 50;
-      transition: transform 45ms linear;
+      pointer-events: none;
+      transform: translate3d(-120px, -120px, 0);
       transform-origin: 68% 24%;
-      filter: drop-shadow(0 10px 16px rgba(0,0,0,0.24));
+      transition: transform 45ms linear;
+      filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.24));
     }
 
     .hammer.swing {
       transform: translate3d(var(--hx), var(--hy), 0) rotate(28deg) scale(0.98);
     }
 
-    .hammer-body { width: 100%; height: 100%; }
-    .hammer-user {
-      width: 100%; height: 100%; border-radius: 1.2rem; overflow: hidden; border: 3px solid rgba(255,255,255,0.7); background: var(--color-surface);
+    .hammer-body {
+      width: 100%;
+      height: 100%;
     }
-    .hammer-user img { width: 100%; height: 100%; object-fit: cover; }
-    .hammer-default { position: relative; width: 80px; height: 80px; }
-    .hammer-default::before, .hammer-default::after { content: ''; position: absolute; border-radius: 999px; }
-    .hammer-default::before { width: 24px; height: 68px; background: linear-gradient(180deg, #b3773c, #805029); left: 32px; top: 8px; transform: rotate(28deg); }
-    .hammer-default::after { width: 48px; height: 24px; background: linear-gradient(180deg, #c7d0d8, #7b8893); left: 14px; top: 4px; border-radius: 0.85rem; box-shadow: inset 0 -4px 5px rgba(0,0,0,0.18); }
+
+    .hammer-user {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border: 3px solid rgba(255, 255, 255, 0.7);
+      border-radius: 1.2rem;
+      background: var(--color-surface);
+    }
+
+    .hammer-user img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hammer-default {
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+
+    .hammer-default::before,
+    .hammer-default::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+    }
+
+    .hammer-default::before {
+      left: 32px;
+      top: 8px;
+      width: 24px;
+      height: 68px;
+      transform: rotate(28deg);
+      background: linear-gradient(180deg, #b3773c, #805029);
+    }
+
+    .hammer-default::after {
+      left: 14px;
+      top: 4px;
+      width: 48px;
+      height: 24px;
+      border-radius: 0.85rem;
+      background: linear-gradient(180deg, #c7d0d8, #7b8893);
+      box-shadow: inset 0 -4px 5px rgba(0, 0, 0, 0.18);
+    }
 
     .result-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(13, 11, 9, 0.6);
-      border-radius: var(--radius-xl);
+      z-index: 20;
       display: grid;
       place-items: center;
       padding: var(--space-5);
+      border-radius: var(--radius-xl);
       opacity: 0;
       pointer-events: none;
+      background: rgba(13, 11, 9, 0.6);
       transition: opacity 220ms ease;
-      z-index: 20;
     }
 
     .result-overlay.show {
@@ -268,16 +382,16 @@
 
     .result-card {
       width: min(100%, 360px);
-      background: rgba(22, 18, 15, 0.88);
-      color: white;
-      border-radius: var(--radius-xl);
-      border: 1px solid rgba(255,255,255,0.14);
-      box-shadow: var(--shadow-lg);
-      padding: var(--space-6);
       display: grid;
       gap: var(--space-4);
       justify-items: center;
+      padding: var(--space-6);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius-xl);
+      background: rgba(22, 18, 15, 0.88);
+      color: white;
       text-align: center;
+      box-shadow: var(--shadow-lg);
     }
 
     .result-card h2 {
@@ -289,37 +403,37 @@
     .result-card p {
       margin: 0;
       font-size: var(--text-base);
-      color: rgba(255,255,255,0.86);
+      color: rgba(255, 255, 255, 0.86);
     }
-
-    .mini-score {
-      position: absolute;
-      right: 0;
-      bottom: -3.5rem;
-      opacity: 0;
-      pointer-events: none;
-      font-size: var(--text-sm);
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-full);
-      padding: 0.55rem 0.9rem;
-      box-shadow: var(--shadow-sm);
-      transition: opacity var(--transition);
-    }
-
-    .game-shell.show-score .mini-score { opacity: 1; }
 
     @media (max-width: 720px) {
-      body { overflow: auto; cursor: auto; }
-      button { cursor: pointer; }
-      .board-grid { grid-template-columns: repeat(3, minmax(88px, 1fr)); gap: var(--space-3); }
-      .hole { min-height: 108px; }
-      .hammer { display: none; }
-      .mini-score { position: static; opacity: 1; margin-top: var(--space-3); }
+      body {
+        overflow: auto;
+        cursor: auto;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .board-grid {
+        grid-template-columns: repeat(3, minmax(88px, 1fr));
+        gap: var(--space-3);
+      }
+
+      .hole {
+        min-height: 108px;
+      }
+
+      .hammer {
+        display: none;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
+      *,
+      *::before,
+      *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
@@ -327,12 +441,13 @@
     }
   </style>
 </head>
+
 <body>
   <div class="hammer" id="hammer" aria-hidden="true">
     <div class="hammer-body" id="hammerBody"></div>
   </div>
 
-  <main class="game-shell" id="gameShell">
+  <main class="game-shell">
     <div class="top-controls">
       <button class="start-btn" id="startBtn" type="button">Start</button>
       <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
@@ -348,27 +463,25 @@
           <button class="start-btn" id="overlayButton" type="button">Play</button>
         </div>
       </div>
-
     </section>
   </main>
 
   <script>
     const ASSETS = {
-      mole: './assets/mole.png',
-      hit: './assets/mole-hit.png',
-      hammer: './assets/hammer.png'
+      mole: "./assets/mole.png",
+      hit: "./assets/mole-hit.png",
+      hammer: "./assets/hammer.png"
     };
 
-    const board = document.getElementById('board');
-    const startBtn = document.getElementById('startBtn');
-    const overlayButton = document.getElementById('overlayButton');
-    const resultOverlay = document.getElementById('resultOverlay');
-    const overlayTitle = document.getElementById('overlayTitle');
-    const overlayText = document.getElementById('overlayText');
-    const hammer = document.getElementById('hammer');
-    const hammerBody = document.getElementById('hammerBody');
-    const themeToggle = document.querySelector('[data-theme-toggle]');
-    const gameShell = document.getElementById('gameShell');
+    const board = document.getElementById("board");
+    const startBtn = document.getElementById("startBtn");
+    const overlayButton = document.getElementById("overlayButton");
+    const resultOverlay = document.getElementById("resultOverlay");
+    const overlayTitle = document.getElementById("overlayTitle");
+    const overlayText = document.getElementById("overlayText");
+    const hammer = document.getElementById("hammer");
+    const hammerBody = document.getElementById("hammerBody");
+    const themeToggle = document.querySelector("[data-theme-toggle]");
 
     const state = {
       tries: 0,
@@ -380,53 +493,84 @@
       activeHole: null,
       popTimer: null,
       nextTimer: null,
-      theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      theme: window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light"
     };
 
-    document.documentElement.setAttribute('data-theme', state.theme);
+    document.documentElement.setAttribute("data-theme", state.theme);
     updateThemeIcon();
 
     function createHole(index) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'hole';
-      button.setAttribute('aria-label', `Hole ${index + 1}`);
+      const button = document.createElement("button");
+
+      button.type = "button";
+      button.className = "hole";
+      button.setAttribute("aria-label", `Hole ${index + 1}`);
       button.dataset.index = String(index);
+
       button.innerHTML = `
         <span class="mole-wrap" aria-hidden="true">
           <span class="mole-figure">
-            <img class="mole-base" src="${ASSETS.mole}" alt="Mole" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'mole-fallback',textContent:'MOLE'}))">
-            <img class="mole-hit-image" src="${ASSETS.hit}" alt="Hit mole" onerror="this.style.display='none'">
+            <img
+              class="mole-base"
+              src="${ASSETS.mole}"
+              alt="Mole"
+              onerror="this.replaceWith(Object.assign(document.createElement('span'), { className: 'mole-fallback', textContent: 'MOLE' }))"
+            >
+            <img
+              class="mole-hit-image"
+              src="${ASSETS.hit}"
+              alt="Hit mole"
+              onerror="this.style.display='none'"
+            >
           </span>
         </span>
       `;
-      button.addEventListener('click', () => handleHoleClick(button));
+
+      button.addEventListener("click", () => handleHoleClick(button));
+
       return button;
     }
 
     const holes = Array.from({ length: 9 }, (_, index) => createHole(index));
-    holes.forEach(hole => board.appendChild(hole));
+    holes.forEach((hole) => board.appendChild(hole));
 
-    hammerBody.innerHTML = `<div class="hammer-user"><img src="${ASSETS.hammer}" alt="Hammer image" onerror="this.parentElement.replaceWith(Object.assign(document.createElement('div'),{className:'hammer-default'}))" /></div>`;
+    hammerBody.innerHTML = `
+      <div class="hammer-user">
+        <img
+          src="${ASSETS.hammer}"
+          alt="Hammer image"
+          onerror="this.parentElement.replaceWith(Object.assign(document.createElement('div'), { className: 'hammer-default' }))"
+        >
+      </div>
+    `;
 
     function clearTimers() {
       clearTimeout(state.popTimer);
       clearTimeout(state.nextTimer);
     }
 
-    function resetHoleVisuals(hole) {
-      hole.classList.remove('hit');
-      const base = hole.querySelector('.mole-base');
-      const hit = hole.querySelector('.mole-hit-image');
-      if (base) base.style.opacity = '1';
-      if (hit) hit.style.opacity = '0';
+    /*
+      Return a hole to its initial visual state:
+      base mole visible, hit mole hidden.
+    */
+    function resetMoleImages(hole) {
+      hole.classList.remove("hit");
+
+      const baseMole = hole.querySelector(".mole-base");
+      const hitMole = hole.querySelector(".mole-hit-image");
+
+      if (baseMole) baseMole.style.opacity = "1";
+      if (hitMole) hitMole.style.opacity = "0";
     }
 
     function hideAllMoles() {
       holes.forEach((hole) => {
-        hole.classList.remove('up', 'hit');
-        resetHoleVisuals(hole);
+        hole.classList.remove("up", "hit");
+        resetMoleImages(hole);
       });
+
       state.activeHole = null;
     }
 
@@ -437,21 +581,41 @@
 
     function scheduleNextPop(delay = 320) {
       clearTimeout(state.nextTimer);
+
       if (!state.running) return;
+
       state.nextTimer = setTimeout(popMole, delay);
     }
 
     function popMole() {
       hideAllMoles();
+
       if (!state.running) return;
+
       const hole = randomHole();
-      resetHoleVisuals(hole);
+
+      /*
+        Before rising:
+        normal mole = opacity 1
+        hit mole = opacity 0
+      */
+      resetMoleImages(hole);
+
       state.activeHole = hole;
-      hole.classList.add('up');
+      hole.classList.add("up");
+
       state.popTimer = setTimeout(() => {
         if (state.activeHole === hole) {
-          hole.classList.remove('up', 'hit');
-          resetHoleVisuals(hole);
+          /*
+            Mole was missed:
+            lower both image layers together.
+          */
+          hole.classList.remove("up");
+
+          setTimeout(() => {
+            resetMoleImages(hole);
+          }, 200);
+
           state.activeHole = null;
           scheduleNextPop(220 + Math.random() * 320);
         }
@@ -461,99 +625,136 @@
     function beginRound() {
       clearTimers();
       hideAllMoles();
+
       state.tries = 0;
       state.hits = 0;
       state.misses = 0;
       state.running = true;
-      gameShell.classList.remove('show-score');
-      resultOverlay.classList.remove('show');
+
+      resultOverlay.classList.remove("show");
+
       scheduleNextPop(350);
     }
 
     function finishRound() {
       clearTimers();
       hideAllMoles();
+
       state.running = false;
+
       const won = state.hits >= state.targetHits;
-      gameShell.classList.add('show-score');
-      overlayTitle.textContent = won ? 'sorry' : 'Try again';
+
+      overlayTitle.textContent = won ? "Sorry" : "Try again";
       overlayText.textContent = won
-        ? ''
+        ? ""
         : `You got ${state.hits} hits. You need 5 out of 10.`;
-      overlayButton.textContent = 'Play again';
-      resultOverlay.classList.add('show');
+
+      overlayButton.textContent = "Play again";
+      resultOverlay.classList.add("show");
     }
 
     function registerTry(hitSuccessful) {
       state.tries += 1;
-      if (hitSuccessful) state.hits += 1;
-      else state.misses += 1;
+
+      if (hitSuccessful) {
+        state.hits += 1;
+      } else {
+        state.misses += 1;
+      }
+
       if (state.hits >= state.targetHits) {
         finishRound();
         return;
       }
-      if (state.tries >= state.maxTries) finishRound();
+
+      if (state.tries >= state.maxTries) {
+        finishRound();
+      }
     }
 
     function handleHoleClick(hole) {
       if (!state.running) return;
-      const isActive = hole === state.activeHole && hole.classList.contains('up');
+
+      const isActive =
+        hole === state.activeHole &&
+        hole.classList.contains("up");
+
       registerTry(isActive);
+
       if (!isActive) return;
 
       clearTimers();
       state.activeHole = null;
 
-      const base = hole.querySelector('.mole-base');
-      const hit = hole.querySelector('.mole-hit-image');
+      /*
+        Hit:
+        CSS changes normal mole to opacity 0,
+        hit mole to opacity 1.
+      */
+      hole.classList.add("hit");
 
-      if (base) base.style.opacity = '0';
-      if (hit) hit.style.opacity = '1';
-
-      hole.classList.add('hit');
-
+      /*
+        Let the hit face be visible briefly,
+        then lower the parent wrapper containing both images.
+      */
       setTimeout(() => {
-        hole.classList.remove('up');
-      }, 160);
+        hole.classList.remove("up");
+      }, 180);
 
+      /*
+        Once both images are down, reset:
+        normal mole opacity 1, hit mole opacity 0.
+      */
       setTimeout(() => {
-        hole.classList.remove('hit');
-        resetHoleVisuals(hole);
+        resetMoleImages(hole);
+
         if (state.running && state.tries < state.maxTries) {
           scheduleNextPop(180 + Math.random() * 220);
         }
       }, 420);
     }
 
-    startBtn.addEventListener('click', beginRound);
-    overlayButton.addEventListener('click', beginRound);
+    startBtn.addEventListener("click", beginRound);
+    overlayButton.addEventListener("click", beginRound);
 
-    document.addEventListener('pointermove', (event) => {
+    document.addEventListener("pointermove", (event) => {
       const x = event.clientX - 18;
       const y = event.clientY - 18;
-      hammer.style.setProperty('--hx', `${x}px`);
-      hammer.style.setProperty('--hy', `${y}px`);
-      if (!hammer.classList.contains('swing')) {
+
+      hammer.style.setProperty("--hx", `${x}px`);
+      hammer.style.setProperty("--hy", `${y}px`);
+
+      if (!hammer.classList.contains("swing")) {
         hammer.style.transform = `translate3d(${x}px, ${y}px, 0)`;
       }
     });
 
-    document.addEventListener('pointerdown', () => {
-      hammer.classList.add('swing');
+    document.addEventListener("pointerdown", () => {
+      hammer.classList.add("swing");
+
       setTimeout(() => {
-        hammer.classList.remove('swing');
+        hammer.classList.remove("swing");
       }, 110);
     });
 
     function updateThemeIcon() {
-      themeToggle.innerHTML = state.theme === 'dark'
-        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>'
-        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+      themeToggle.innerHTML = state.theme === "dark"
+        ? `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"></circle>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+          </svg>
+        `
+        : `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        `;
     }
 
-    themeToggle.addEventListener('click', () => {
-      state.theme = state.theme === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', state.theme);
+    themeToggle.addEventListener("click", () => {
+      state.theme = state.theme === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", state.theme);
       updateThemeIcon();
     });
   </script>
